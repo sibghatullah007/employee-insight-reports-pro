@@ -1,9 +1,9 @@
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { Employee } from '../types/Employee';
+import { EmployeeReport } from '../types/Employee';
 
-export const generateEmployeePDF = async (employee: Employee, elementId: string) => {
+export const generateEmployeePDF = async (employee: EmployeeReport, elementId: string) => {
   const element = document.getElementById(elementId);
   if (!element) {
     console.error('Element not found for PDF generation');
@@ -37,7 +37,7 @@ export const generateEmployeePDF = async (employee: Employee, elementId: string)
       heightLeft -= pageHeight;
     }
 
-    pdf.save(`${employee.name.replace(/\s+/g, '_')}_Performance_Report.pdf`);
+    pdf.save(`${employee.name.replace(/\s+/g, '_')}_Hours_Report.pdf`);
   } catch (error) {
     console.error('Error generating PDF:', error);
   }

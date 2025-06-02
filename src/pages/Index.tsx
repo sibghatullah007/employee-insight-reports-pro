@@ -1,15 +1,15 @@
 
 import React, { useState } from 'react';
-import { FileText, Users } from 'lucide-react';
-import FileUpload from '../components/FileUpload';
-import ReportViewer from '../components/ReportViewer';
-import { Employee } from '../types/Employee';
+import { FileText, Clock } from 'lucide-react';
+import DualFileUpload from '../components/DualFileUpload';
+import HoursReportViewer from '../components/HoursReportViewer';
+import { EmployeeReport } from '../types/Employee';
 
 const Index = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [reports, setReports] = useState<EmployeeReport[]>([]);
 
-  const handleDataParsed = (parsedEmployees: Employee[]) => {
-    setEmployees(parsedEmployees);
+  const handleDataProcessed = (processedReports: EmployeeReport[]) => {
+    setReports(processedReports);
   };
 
   return (
@@ -19,21 +19,21 @@ const Index = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="p-3 bg-blue-600 rounded-full">
-              <FileText className="h-8 w-8 text-white" />
+              <Clock className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-4xl font-bold text-gray-900">
-              Employee Report Generator
+              Employee Hours Report Generator
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Upload your employee CSV file to generate professional performance reports with downloadable PDFs
+            Upload your employee hours and billing CSV files to generate comprehensive payroll reports
           </p>
         </div>
 
         {/* Main Content */}
-        {employees.length === 0 ? (
+        {reports.length === 0 ? (
           <div className="max-w-4xl mx-auto">
-            <FileUpload onDataParsed={handleDataParsed} />
+            <DualFileUpload onDataProcessed={handleDataProcessed} />
             
             {/* Features Section */}
             <div className="mt-16 grid md:grid-cols-3 gap-8">
@@ -41,24 +41,24 @@ const Index = () => {
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FileText className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">CSV Upload</h3>
-                <p className="text-gray-600">Simply drag and drop your employee data CSV file to get started</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Dual CSV Upload</h3>
+                <p className="text-gray-600">Upload week hours and billed hours CSV files for comprehensive reporting</p>
               </div>
               
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-green-600" />
+                  <Clock className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Auto Processing</h3>
-                <p className="text-gray-600">Automatically parse and generate individual reports for each employee</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Auto Calculations</h3>
+                <p className="text-gray-600">Automatically calculate worked hours, overtime, efficiency, and incentives</p>
               </div>
               
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FileText className="h-8 w-8 text-purple-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF Export</h3>
-                <p className="text-gray-600">Download professional PDF reports for each employee instantly</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">PDF Reports</h3>
+                <p className="text-gray-600">Generate professional payroll reports with detailed breakdowns</p>
               </div>
             </div>
           </div>
@@ -66,14 +66,14 @@ const Index = () => {
           <div>
             <div className="text-center mb-8">
               <button
-                onClick={() => setEmployees([])}
+                onClick={() => setReports([])}
                 className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <FileText className="h-4 w-4" />
-                <span>Upload New File</span>
+                <span>Upload New Files</span>
               </button>
             </div>
-            <ReportViewer employees={employees} />
+            <HoursReportViewer reports={reports} />
           </div>
         )}
       </div>
