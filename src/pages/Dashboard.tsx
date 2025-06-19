@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Shop, Employee, PayrollSubmission } from '../types/Shop';
@@ -8,6 +7,7 @@ import { Building2, Users, FileText, Plus, LogOut } from 'lucide-react';
 import ShopSetup from '../components/shop/ShopSetup';
 import EmployeeManagement from '../components/shop/EmployeeManagement';
 import PayrollHistory from '../components/payroll/PayrollHistory';
+import PayrollSubmission from '../components/payroll/PayrollSubmission';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -109,7 +109,7 @@ const Dashboard = () => {
           <Button
             variant={activeTab === 'payroll' ? 'default' : 'outline'}
             onClick={() => setActiveTab('payroll')}
-            disabled={!shop || employees.length === 0}
+            disabled={!shop}
             className="flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
@@ -142,13 +142,10 @@ const Dashboard = () => {
           )}
           
           {activeTab === 'payroll' && shop && (
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold mb-4">New Payroll Submission</h2>
-              <p className="text-gray-600 mb-8">
-                This feature will allow CSV upload and payroll processing
-              </p>
-              <Button disabled>Coming Soon</Button>
-            </div>
+            <PayrollSubmission
+              shop={shop}
+              employees={employees}
+            />
           )}
           
           {activeTab === 'history' && (
