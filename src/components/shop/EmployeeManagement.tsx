@@ -20,12 +20,12 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ shop, employees
   const [formData, setFormData] = useState({
     name: '',
     startDate: '',
-    role: 'Technician' as const,
-    payType: 'Hourly + Proficiency' as const,
+    role: 'Technician' as Employee['role'],
+    payType: 'Hourly + Proficiency' as Employee['payType'],
     hourlyRate: 0,
     salaryAmount: 0,
     commissionRate: 0,
-    commissionType: 'GP Percentage' as const,
+    commissionType: 'GP Percentage' as Employee['commissionType'],
   });
 
   const resetForm = () => {
@@ -130,7 +130,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ shop, employees
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="role">Role</Label>
-                  <Select value={formData.role} onValueChange={(value: any) => setFormData(prev => ({ ...prev, role: value }))}>
+                  <Select value={formData.role} onValueChange={(value: Employee['role']) => setFormData(prev => ({ ...prev, role: value }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -145,7 +145,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ shop, employees
                 </div>
                 <div>
                   <Label htmlFor="payType">Pay Type</Label>
-                  <Select value={formData.payType} onValueChange={(value: any) => setFormData(prev => ({ ...prev, payType: value }))}>
+                  <Select value={formData.payType} onValueChange={(value: Employee['payType']) => setFormData(prev => ({ ...prev, payType: value }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -199,7 +199,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ shop, employees
                   </div>
                   <div>
                     <Label htmlFor="commissionType">Commission Type</Label>
-                    <Select value={formData.commissionType} onValueChange={(value: any) => setFormData(prev => ({ ...prev, commissionType: value }))}>
+                    <Select value={formData.commissionType} onValueChange={(value: Employee['commissionType']) => setFormData(prev => ({ ...prev, commissionType: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
