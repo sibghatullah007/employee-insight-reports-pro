@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Shop, Employee, PayrollSubmission } from '../types/Shop';
+import { Shop, Employee, PayrollSubmission as PayrollSubmissionType } from '../types/Shop';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Building2, Users, FileText, Plus, LogOut } from 'lucide-react';
@@ -13,7 +13,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const [shop, setShop] = useState<Shop | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [payrollHistory, setPayrollHistory] = useState<PayrollSubmission[]>([]);
+  const [payrollHistory, setPayrollHistory] = useState<PayrollSubmissionType[]>([]);
   const [activeTab, setActiveTab] = useState<'setup' | 'employees' | 'payroll' | 'history'>('setup');
 
   useEffect(() => {
