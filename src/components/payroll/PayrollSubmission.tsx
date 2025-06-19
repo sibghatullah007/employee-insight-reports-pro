@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Shop, Employee } from '../../types/Shop';
 import { Button } from '../ui/button';
@@ -6,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Upload, FileText, Download, AlertCircle } from 'lucide-react';
 import Papa from 'papaparse';
 import { generateEmployeePDF } from '../../utils/generatePdf';
+import RoleBasedReportGenerator from './RoleBasedReportGenerator';
 
 interface PayrollSubmissionProps {
   shop: Shop;
@@ -33,13 +33,31 @@ interface BilledHoursData {
 interface ProcessedEmployeeData {
   name: string;
   role: string;
-  weekHours: number;
-  overtime: number;
-  billedHours: number;
-  proficiency: number;
-  regularPay: number;
-  overtimePay: number;
-  incentive: number;
+  payType: string;
+  hourlyRate: number;
+  salaryAmount: number;
+  commissionRate: number;
+  week1: {
+    workedHours: number;
+    overtime: number;
+    billedHours: number;
+    proficiency: number;
+    workedPay: number;
+    overtimePay: number;
+    incentive: number;
+  };
+  week2: {
+    workedHours: number;
+    overtime: number;
+    billedHours: number;
+    proficiency: number;
+    workedPay: number;
+    overtimePay: number;
+    incentive: number;
+  };
+  pto: number;
+  holiday: number;
+  grossProfit: number;
   totalGross: number;
 }
 
@@ -140,23 +158,54 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
       let proficiency = 0;
       
       if (billedData && employeeRecord?.payType === 'Hourly + Proficiency') {
-        incentive = billedData.billedHours * 7.5; // $7.50 per billed hour
+        incentive = billedData.billedHours * 7.5;
         const efficiencyStr = billedData.efficiency.replace('%', '');
         proficiency = parseFloat(efficiencyStr) || 0;
       }
       
-      const totalGross = regularPay + overtimePay + incentive;
+      // Calculate gross profit for commission roles
+      const grossProfit = billedData?.laborSales || 0;
+      const commissionAmount = employeeRecord?.payType?.includes('Commission') 
+        ? (grossProfit * (employeeRecord.commissionRate || 0) / 100) 
+        : 0;
+      
+      // Calculate salary portion for salary-based roles
+      const salaryPortion = employeeRecord?.payType?.includes('Salary') 
+        ? (employeeRecord.salaryAmount || 0) / 26 // Bi-weekly
+        : 0;
+      
+      const totalGross = employeeRecord?.payType?.includes('Salary') 
+        ? salaryPortion + commissionAmount
+        : regularPay + overtimePay + incentive;
 
       processedEmployees.push({
         name: weekData.employee,
         role: weekData.role,
-        weekHours: weekData.totalHours,
-        overtime: overtimeHours,
-        billedHours: billedData?.billedHours || 0,
-        proficiency,
-        regularPay,
-        overtimePay,
-        incentive,
+        payType: employeeRecord?.payType || 'Hourly',
+        hourlyRate,
+        salaryAmount: employeeRecord?.salaryAmount || 0,
+        commissionRate: employeeRecord?.commissionRate || 0,
+        week1: {
+          workedHours: regularHours,
+          overtime: overtimeHours,
+          billedHours: billedData?.billedHours || 0,
+          proficiency,
+          workedPay: regularPay,
+          overtimePay,
+          incentive
+        },
+        week2: {
+          workedHours: 0,
+          overtime: 0,
+          billedHours: 0,
+          proficiency: 0,
+          workedPay: 0,
+          overtimePay: 0,
+          incentive: 0
+        },
+        pto: 0,
+        holiday: 0,
+        grossProfit,
         totalGross
       });
     });
@@ -295,82 +344,11 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
           {processedData.map((employee, index) => (
             <Card key={index}>
               <CardContent className="pt-6">
-                <div
-                  id={`payroll-report-${index}`}
-                  className="space-y-4"
-                >
-                  {/* Header */}
-                  <div className="text-center border-b pb-4">
-                    <h2 className="text-2xl font-bold">{shop.name}</h2>
-                    <h3 className="text-lg">Employee Performance Report</h3>
-                  </div>
-
-                  {/* Employee Info */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><strong>Name:</strong> {employee.name}</div>
-                    <div><strong>Role:</strong> {employee.role}</div>
-                  </div>
-
-                  {/* Payroll Table */}
-                  <div className="bg-gray-50 p-4 rounded-lg font-mono text-sm">
-                    <div className="grid grid-cols-4 gap-2 font-bold border-b pb-2 mb-2">
-                      <div>DESCRIPTION</div>
-                      <div className="text-center">HOURS</div>
-                      <div className="text-center">RATE</div>
-                      <div className="text-center">TOTAL</div>
-                    </div>
-
-                    {/* Regular Hours */}
-                    <div className="space-y-1 mb-2">
-                      <div className="grid grid-cols-4 gap-2">
-                        <div>REGULAR HOURS</div>
-                        <div className="text-center">{Math.min(employee.weekHours, 40).toFixed(2)}</div>
-                        <div className="text-center">${(employee.regularPay / Math.min(employee.weekHours, 40) || 0).toFixed(2)}</div>
-                        <div className="text-center">${employee.regularPay.toFixed(2)}</div>
-                      </div>
-                      <div className="grid grid-cols-4 gap-2">
-                        <div>OVERTIME HOURS</div>
-                        <div className="text-center">{employee.overtime.toFixed(2)}</div>
-                        <div className="text-center">${employee.overtime > 0 ? (employee.overtimePay / employee.overtime).toFixed(2) : '0.00'}</div>
-                        <div className="text-center">${employee.overtimePay.toFixed(2)}</div>
-                      </div>
-                      <div className="grid grid-cols-4 gap-2">
-                        <div>BILLED HOURS</div>
-                        <div className="text-center">{employee.billedHours.toFixed(2)}</div>
-                        <div className="text-center">-</div>
-                        <div className="text-center">-</div>
-                      </div>
-                      <div className="grid grid-cols-4 gap-2">
-                        <div>PROFICIENCY</div>
-                        <div className="text-center">{employee.proficiency.toFixed(2)}%</div>
-                        <div className="text-center">-</div>
-                        <div className="text-center">-</div>
-                      </div>
-                    </div>
-
-                    {/* Incentive */}
-                    {employee.incentive > 0 && (
-                      <div className="space-y-1 mb-2">
-                        <div className="grid grid-cols-4 gap-2">
-                          <div>INCENTIVE</div>
-                          <div className="text-center">{employee.billedHours.toFixed(2)}</div>
-                          <div className="text-center">$7.50</div>
-                          <div className="text-center">${employee.incentive.toFixed(2)}</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Total */}
-                    <div className="border-t pt-2">
-                      <div className="grid grid-cols-4 gap-2 font-bold">
-                        <div>TOTAL GROSS WAGES</div>
-                        <div className="text-center">-</div>
-                        <div className="text-center">-</div>
-                        <div className="text-center">${employee.totalGross.toFixed(2)}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <RoleBasedReportGenerator 
+                  employee={employee}
+                  index={index}
+                  shop={shop}
+                />
 
                 <div className="mt-4">
                   <Button
