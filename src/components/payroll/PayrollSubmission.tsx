@@ -6,6 +6,7 @@ import { Upload, FileText, Download, AlertCircle } from 'lucide-react';
 import Papa from 'papaparse';
 import { generateEmployeePDF } from '../../utils/generatePdf';
 import RoleBasedReportGenerator from './RoleBasedReportGenerator';
+import EmployeeRatesTable from './EmployeeRatesTable';
 
 interface PayrollSubmissionProps {
   shop: Shop;
@@ -65,6 +66,9 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
   const [weekHoursFile, setWeekHoursFile] = useState<File | null>(null);
   const [billedHoursFile, setBilledHoursFile] = useState<File | null>(null);
   const [processedData, setProcessedData] = useState<ProcessedEmployeeData[]>([]);
+  const [parsedWeekHours, setParsedWeekHours] = useState<WeekHoursData[]>([]);
+  const [parsedBilledHours, setParsedBilledHours] = useState<BilledHoursData[]>([]);
+  const [showRatesTable, setShowRatesTable] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string>('');
 
@@ -138,15 +142,21 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
     });
   };
 
-  const processEmployeeData = (weekHours: WeekHoursData[], billedHours: BilledHoursData[]): ProcessedEmployeeData[] => {
+  const processEmployeeDataWithRates = (
+    weekHours: WeekHoursData[], 
+    billedHours: BilledHoursData[],
+    employeeRates: { [employeeName: string]: any }
+  ): ProcessedEmployeeData[] => {
     const processedEmployees: ProcessedEmployeeData[] = [];
 
     weekHours.forEach(weekData => {
-      const employeeRecord = employees.find(emp => emp.name === weekData.employee);
       const billedData = billedHours.find(billed => billed.technician === weekData.employee);
+      const rateData = employeeRates[weekData.employee];
       
-      const hourlyRate = employeeRecord?.hourlyRate || 30;
-      const overtimeRate = hourlyRate * 1.5;
+      if (!rateData) return;
+      
+      const hourlyRate = rateData.hourlyRate || 30;
+      const overtimeRate = rateData.overtimeRate || (hourlyRate * 1.5);
       
       const regularHours = Math.min(weekData.totalHours, 40);
       const overtimeHours = Math.max(weekData.totalHours - 40, 0);
@@ -157,34 +167,34 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
       let incentive = 0;
       let proficiency = 0;
       
-      if (billedData && employeeRecord?.payType === 'Hourly + Proficiency') {
-        incentive = billedData.billedHours * 7.5;
+      if (billedData && rateData.payType === 'Hourly + Proficiency') {
+        incentive = billedData.billedHours * (rateData.incentiveRate || 7.5);
         const efficiencyStr = billedData.efficiency.replace('%', '');
         proficiency = parseFloat(efficiencyStr) || 0;
       }
       
       // Calculate gross profit for commission roles
       const grossProfit = billedData?.laborSales || 0;
-      const commissionAmount = employeeRecord?.payType?.includes('Commission') 
-        ? (grossProfit * (employeeRecord.commissionRate || 0) / 100) 
+      const commissionAmount = rateData.payType?.includes('Commission') 
+        ? (grossProfit * (rateData.commissionRate || 0) / 100) 
         : 0;
       
       // Calculate salary portion for salary-based roles
-      const salaryPortion = employeeRecord?.payType?.includes('Salary') 
-        ? (employeeRecord.salaryAmount || 0) / 26 // Bi-weekly
+      const salaryPortion = rateData.payType?.includes('Salary') 
+        ? (rateData.salaryAmount || 0) / 26 // Bi-weekly
         : 0;
       
-      const totalGross = employeeRecord?.payType?.includes('Salary') 
+      const totalGross = rateData.payType?.includes('Salary') 
         ? salaryPortion + commissionAmount
         : regularPay + overtimePay + incentive;
 
       processedEmployees.push({
         name: weekData.employee,
-        role: weekData.role,
-        payType: employeeRecord?.payType || 'Hourly',
+        role: rateData.role || weekData.role,
+        payType: rateData.payType || 'Hourly',
         hourlyRate,
-        salaryAmount: employeeRecord?.salaryAmount || 0,
-        commissionRate: employeeRecord?.commissionRate || 0,
+        salaryAmount: rateData.salaryAmount || 0,
+        commissionRate: rateData.commissionRate || 0,
         week1: {
           workedHours: regularHours,
           overtime: overtimeHours,
@@ -228,12 +238,12 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
         parseBilledHours(billedHoursFile)
       ]);
 
-      const processed = processEmployeeData(weekHours, billedHours);
-      
-      if (processed.length === 0) {
+      if (weekHours.length === 0) {
         setError('No valid employee data found in the CSV files');
       } else {
-        setProcessedData(processed);
+        setParsedWeekHours(weekHours);
+        setParsedBilledHours(billedHours);
+        setShowRatesTable(true);
       }
     } catch (err) {
       setError('Error processing CSV files. Please check the format.');
@@ -241,6 +251,12 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleRatesConfirmed = (employeeRates: { [employeeName: string]: any }) => {
+    const processed = processEmployeeDataWithRates(parsedWeekHours, parsedBilledHours, employeeRates);
+    setProcessedData(processed);
+    setShowRatesTable(false);
   };
 
   const generatePDF = async (employee: ProcessedEmployeeData, index: number) => {
@@ -336,6 +352,14 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
           )}
         </CardContent>
       </Card>
+
+      {showRatesTable && (
+        <EmployeeRatesTable
+          employees={parsedWeekHours.map(emp => emp.employee)}
+          roles={Object.fromEntries(parsedWeekHours.map(emp => [emp.employee, emp.role]))}
+          onRatesConfirmed={handleRatesConfirmed}
+        />
+      )}
 
       {processedData.length > 0 && (
         <div className="space-y-4">
