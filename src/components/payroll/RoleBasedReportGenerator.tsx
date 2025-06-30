@@ -48,13 +48,13 @@ const RoleBasedReportGenerator: React.FC<RoleBasedReportProps> = ({ employee, in
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 1 WORKED HOURS</div>
           <div className="text-center">{employee.week1?.workedHours?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$30.00</div>
+          <div className="text-center">${employee.hourlyRate?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week1?.workedPay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 1 OVERTIME</div>
           <div className="text-center">{employee.week1?.overtime?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$45.00</div>
+          <div className="text-center">${(employee.hourlyRate * 1.5)?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week1?.overtimePay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
@@ -76,13 +76,13 @@ const RoleBasedReportGenerator: React.FC<RoleBasedReportProps> = ({ employee, in
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 2 WORKED HOURS</div>
           <div className="text-center">{employee.week2?.workedHours?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$30.00</div>
+          <div className="text-center">${employee.hourlyRate?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week2?.workedPay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 2 OVERTIME</div>
           <div className="text-center">{employee.week2?.overtime?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$45.00</div>
+          <div className="text-center">${(employee.hourlyRate * 1.5)?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week2?.overtimePay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
@@ -104,8 +104,8 @@ const RoleBasedReportGenerator: React.FC<RoleBasedReportProps> = ({ employee, in
         <div className="grid grid-cols-4 gap-2">
           <div>PTO</div>
           <div className="text-center">{employee.pto?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$30.00</div>
-          <div className="text-center">{formatCurrency((employee.pto || 0) * 30)}</div>
+          <div className="text-center">${employee.hourlyRate?.toFixed(2) || '0.00'}</div>
+          <div className="text-center">{formatCurrency((employee.pto || 0) * (employee.hourlyRate || 0))}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>HOLIDAY</div>
@@ -120,13 +120,13 @@ const RoleBasedReportGenerator: React.FC<RoleBasedReportProps> = ({ employee, in
         <div className="grid grid-cols-4 gap-2">
           <div>INCENTIVE WEEK 1</div>
           <div className="text-center">{employee.week1?.billedHours?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$7.50</div>
+          <div className="text-center">${(employee.incentiveRate || 0).toFixed(2)}</div>
           <div className="text-center">{formatCurrency(employee.week1?.incentive || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>INCENTIVE WEEK 2</div>
           <div className="text-center">{employee.week2?.billedHours?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$0.00</div>
+          <div className="text-center">${(employee.incentiveRate || 0).toFixed(2)}</div>
           <div className="text-center">{formatCurrency(employee.week2?.incentive || 0)}</div>
         </div>
       </div>
@@ -156,32 +156,32 @@ const RoleBasedReportGenerator: React.FC<RoleBasedReportProps> = ({ employee, in
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 1 WORKED HOURS</div>
           <div className="text-center">{employee.week1?.workedHours?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$30.00</div>
+          <div className="text-center">${employee.hourlyRate?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week1?.workedPay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 1 OVERTIME</div>
           <div className="text-center">{employee.week1?.overtime?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$45.00</div>
+          <div className="text-center">${(employee.hourlyRate * 1.5)?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week1?.overtimePay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 2 WORKED HOURS</div>
           <div className="text-center">{employee.week2?.workedHours?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$30.00</div>
+          <div className="text-center">${employee.hourlyRate?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week2?.workedPay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>WEEK 2 OVERTIME</div>
           <div className="text-center">{employee.week2?.overtime?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$45.00</div>
+          <div className="text-center">${(employee.hourlyRate * 1.5)?.toFixed(2) || '0.00'}</div>
           <div className="text-center">{formatCurrency(employee.week2?.overtimePay || 0)}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>PTO</div>
           <div className="text-center">{employee.pto?.toFixed(2) || '0.00'}</div>
-          <div className="text-center">$30.00</div>
-          <div className="text-center">{formatCurrency((employee.pto || 0) * 30)}</div>
+          <div className="text-center">${employee.hourlyRate?.toFixed(2) || '0.00'}</div>
+          <div className="text-center">{formatCurrency((employee.pto || 0) * (employee.hourlyRate || 0))}</div>
         </div>
         <div className="grid grid-cols-4 gap-2">
           <div>HOLIDAY</div>

@@ -38,6 +38,7 @@ interface ProcessedEmployeeData {
   hourlyRate: number;
   salaryAmount: number;
   commissionRate: number;
+  incentiveRate: number;
   week1: {
     workedHours: number;
     overtime: number;
@@ -155,8 +156,9 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
       
       if (!rateData) return;
       
-      const hourlyRate = rateData.hourlyRate || 30;
+      const hourlyRate = rateData.hourlyRate || 0;
       const overtimeRate = rateData.overtimeRate || (hourlyRate * 1.5);
+      const incentiveRate = rateData.incentiveRate || 0;
       
       const regularHours = Math.min(weekData.totalHours, 40);
       const overtimeHours = Math.max(weekData.totalHours - 40, 0);
@@ -168,7 +170,7 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
       let proficiency = 0;
       
       if (billedData && rateData.payType === 'Hourly + Proficiency') {
-        incentive = billedData.billedHours * (rateData.incentiveRate || 7.5);
+        incentive = billedData.billedHours * incentiveRate;
         const efficiencyStr = billedData.efficiency.replace('%', '');
         proficiency = parseFloat(efficiencyStr) || 0;
       }
@@ -195,6 +197,7 @@ const PayrollSubmission: React.FC<PayrollSubmissionProps> = ({ shop, employees }
         hourlyRate,
         salaryAmount: rateData.salaryAmount || 0,
         commissionRate: rateData.commissionRate || 0,
+        incentiveRate,
         week1: {
           workedHours: regularHours,
           overtime: overtimeHours,
